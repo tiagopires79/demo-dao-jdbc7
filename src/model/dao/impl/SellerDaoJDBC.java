@@ -106,41 +106,8 @@ public class SellerDaoJDBC implements SellerDao {
 
 	@Override
 	public List<Seller> findAll() {
-		PreparedStatement ps = null;
-		ResultSet rs = null;
-		
-		try {			
-			ps = conn.prepareStatement("SELECT se.*, dp.Name as DptoName "
-					                  +"FROM coursejdbc.seller se, coursejdbc.department dp "
-					                  +"WHERE se.DepartmentId = dp.Id "
-					                  //+"AND se.DepartmentId = ? "
-					                  +"ORDER BY Name");
-			//ps.setInt(1, department.getId());
-			
-			rs = ps.executeQuery();
-			
-			List<Seller> sellerList = new ArrayList<>();
-			Map<Integer, Department> map = new HashMap<>();
-						
-			while(rs.next()) {
-				//Verificar se departamento já foi instanciado. Caso já tenha nao instancia novamente pq vai constar no map.
-				Department dep = map.get(rs.getInt("DepartmentId"));				
-				if(dep == null) {
-					dep = instanteateDepartment(rs);
-					map.put(rs.getInt("DepartmentId"), dep);
-				}
-				//Lista de vendedores para apenas uma instancia de departamento
-				sellerList.add(instanteateSeller(rs, dep));				
-			}			
-			return sellerList;					
-		}				
-		catch (SQLException e) {
-			throw new DbException(e.getMessage());
-		}
-		finally {
-			DB.closeStatement(ps);
-		    DB.closeResultSet(rs);
-		}
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override

@@ -26,6 +26,7 @@ public class Program {
 			 System.out.println(obj);
 		}
 		
+<<<<<<< HEAD
 		System.out.println("\n### TEST3: Seller findAll ###");
 		listSeller = sellerDao.findAll();
 		for(Seller obj : listSeller) {
@@ -39,6 +40,8 @@ public class Program {
 		System.out.println(newSeller);	
 	
 		
+=======
+>>>>>>> parent of f31dea9... findall Implementation
 	}
 
 }
