@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,8 +26,39 @@ public class SellerDaoJDBC implements SellerDao {
 	
 	@Override
 	public void insert(Seller obj) {
-		// TODO Auto-generated method stub
-		
+		PreparedStatement ps = null;
+		try {
+			ps = conn.prepareStatement("INSERT INTO seller "
+					+ "(Name, Email, BirthDate, BaseSalary, DepartmentId) "
+					+ "VALUES "
+					+ "(?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+			
+			ps.setString(1, obj.getName());
+			ps.setString(2, obj.getEmail());
+			ps.setDate(3, new java.sql.Date(obj.getBirthDate().getTime()));
+			ps.setDouble(4, obj.getBaseSalary());
+			ps.setInt(5, obj.getDepartment().getId());
+			
+			int rowsAffected = ps.executeUpdate();
+			
+			if(rowsAffected > 0) {
+				ResultSet rs = ps.getGeneratedKeys();
+				if(rs.next()) {
+					int id = rs.getInt(1);
+					obj.setId(id);
+				}
+				DB.closeResultSet(rs);
+			}
+			else {
+				throw new DbException("Unexpected error ! No rows affected.");
+			}					
+		}
+		catch (SQLException e){
+			throw new DbException(e.getMessage());
+		}
+		finally {
+			DB.closeStatement(ps);
+		}		
 	}
 
 	@Override
@@ -70,16 +102,6 @@ public class SellerDaoJDBC implements SellerDao {
 		    DB.closeResultSet(rs);
 		}
 		
-	}
-
-	private Seller instanteateSeller(ResultSet rs, Department dp) throws SQLException {
-		Seller se = new Seller(rs.getInt("Id"),rs.getString("Name"),rs.getString("Email"),rs.getDate("BirthDate"),rs.getDouble("BaseSalary"),dp);
-		return se;
-	}
-
-	private Department instanteateDepartment(ResultSet rs) throws SQLException {
-		Department dp = new Department(rs.getInt("DepartmentId"),rs.getString("DptoName"));	
-		return dp;
 	}
 
 	@Override
@@ -158,6 +180,44 @@ public class SellerDaoJDBC implements SellerDao {
 			DB.closeStatement(ps);
 		    DB.closeResultSet(rs);
 		}
-	}	
+	}
 
+	@Override
+	public Department findDepartmentById(int id) {
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		try {
+			ps = conn.prepareStatement(
+					  "SELECT * "
+					+ "FROM coursejdbc.department "
+					+ "WHERE Id = ?");
+			ps.setInt(1, id);			
+			rs = ps.executeQuery();			
+			rs.first();
+			Department dp = instanteateDepartmentById(rs);			
+			return dp;
+	    }
+		catch(SQLException e) {
+			throw new DbException(e.getMessage());
+		}
+		finally {
+			DB.closeStatement(ps);
+			DB.closeResultSet(rs);
+		}
+    }
+	
+	private Seller instanteateSeller(ResultSet rs, Department dp) throws SQLException {
+		Seller se = new Seller(rs.getInt("Id"),rs.getString("Name"),rs.getString("Email"),rs.getDate("BirthDate"),rs.getDouble("BaseSalary"),dp);
+		return se;
+	}
+
+	private Department instanteateDepartment(ResultSet rs) throws SQLException {
+		Department dp = new Department(rs.getInt("DepartmentId"),rs.getString("DptoName"));	
+		return dp;
+	}
+	
+	private Department instanteateDepartmentById(ResultSet rs) throws SQLException {
+		Department dp = new Department(rs.getInt("Id"),rs.getString("Name"));	
+		return dp;
+	}
 }
